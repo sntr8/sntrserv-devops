@@ -1,0 +1,23 @@
+---
+# vagrant/provision
+- hosts: all
+  become: yes
+
+  tasks:
+    - name: Get the username running the deploy
+      local_action: command whoami
+      become: false
+      register: username
+
+    - name: Check if public key is available
+      stat:
+        path: /Users/{{ username }}/.ssh/id_rsa.pub
+      register: pubkey
+      delegate_to: localhost
+      when: ansible_facts['os_family'] == "Darwin" and username is defined
+
+    - name: Create user
+
+    - name: Create .ssh directory
+      file:
+        path: /home/
