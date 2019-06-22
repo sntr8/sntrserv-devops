@@ -1,0 +1,35 @@
+---
+# provision/tasks/users.yml
+- name: Get the username running the deploy
+  local_action: command whoami
+  become: false
+  register: username
+
+- name: Check if public key is available
+  stat:
+    path: /Users/{{ username.stdout }}/.ssh/id_rsa.pub
+  register: pubkey
+  delegate_to: localhost
+  when: ansible_facts['os_family'] == "Darwin" and username.stdout is defined
+
+- name: Create user to remote
+  user:
+    name: "{{ username.stdout }}"
+    shell: /bin/bash
+    groups: helmsmen
+
+- name: Create .ssh directory
+  file:
+    path: /home/{{ username.stdout }}/.ssh
+    state: directory
+    owner: "{{ username.stdout }}"
+    group: "{{ username.stdout }}"
+    mode: 0700
+
+- name: Copy public key to the remote
+  copy:
+    src: /Users/{{ username.stdout }}/.ssh/id_rsa.pub
+    dest: /home/{{ username.stdout }}/.ssh/authorized_keys
+    owner: "{{ username.stdout }}"
+    group: "{{ username.stdout }}"
+    mode: 0600

@@ -1,0 +1,32 @@
+---
+# provision/tasks/remote
+
+- name: Add missing LANG settings
+  lineinfile:
+    path: /etc/environment
+    regexp: '^LANG='
+    line: 'LANG=en_US.utf-8'
+
+- name: Add missing LC_ALL settings
+  lineinfile:
+    path: /etc/environment
+    regexp: '^LC_ALL='
+    line: 'LC_ALL=en_US.utf-8'
+
+- name: Add sudo group
+  group:
+    name: helmsmen
+    state: present
+
+- name: Check if Ansible template exists
+  stat:
+    path: /etc/sudoers.d/ansible
+  register: sudoers
+
+- name: Permit created group to sudo
+  template:
+    src: files/sudoers.j2
+    dest: /etc/sudoers.d/ansible
+    validate: 'visudo -cf %s'
+    mode: 0440
+  when: sudoers.stat.exists == False
