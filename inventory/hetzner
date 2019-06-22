@@ -1,0 +1,13 @@
+[ace]
+ace.sntrserv.net
+
+[voyager]
+voyager.sntrserv.net
+
+[centos7:children]
+ace
+voyager
+
+[hetzner:children]
+ace
+voyager
